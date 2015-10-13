@@ -1,16 +1,28 @@
 package org.workleanmobile;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class StringCalculatorTest {
-    private StringCalculator target = new StringCalculator();
+    private StringCalculator stringCalculator = null;
+
+    @Mock
+    private StringParser stringParser = null;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+// stringParser = new StringParserWithComma();
+
+        stringCalculator = new StringCalculator(stringParser);
     }
 
     @After
@@ -18,47 +30,63 @@ public class StringCalculatorTest {
     }
 
     @Test
-    public void testEmptyStringReturnsZero() {
-        assertEquals(0, target.add(""));
+    public void testEmptyString() {
+        String[] value = { "" };
+        when(stringParser.parse(anyString())).thenReturn(value);
+
+        assertEquals(0, stringCalculator.add(""));
     }
 
     @Test
-    public void testOneNumberInString() {
-        assertEquals(1, target.add("1"));
-        assertEquals(2, target.add("2"));
-        assertEquals(12318, target.add("12318"));
+    public void testOneNumberString() {
+        String[] value = { "1" };
+        when(stringParser.parse(anyString())).thenReturn(value);
+
+        assertEquals(1, stringCalculator.add("1"));
+
+        String[] value2 = { "2" };
+        when(stringParser.parse(anyString())).thenReturn(value2);
+
+        assertEquals(2, stringCalculator.add("2"));
+
+        assertEquals(3478123, stringCalculator.add("3478123"));
+        assertEquals(5, stringCalculator.add("5,"));
+        assertEquals(5, stringCalculator.add(",5"));
+        assertEquals(0, stringCalculator.add(","));
+        assertEquals(3, stringCalculator.add(",,,,,,,,,,,,,,3"));
     }
 
     @Test
-    public void testAddingTwoNumbersInString() {
-        assertEquals(1 + 2, target.add("1,2"));
-        assertEquals(34 + 43, target.add("34,43"));
+    public void testAddTwoNumberString() {
+        assertEquals(344 + 100, stringCalculator.add("344,100"));
+        assertEquals(0 + 0, stringCalculator.add("0,0"));
+        assertEquals(-3 + 3, stringCalculator.add("-3,3"));
+    }
+
+    @Test
+    public void specialTest() {
+        StringParser parse = new StringParser() {
+
+            public String[] parse(String source) {
+                return source.split(",");
+            }
+        };
+        stringCalculator = new StringCalculator(parse);
+    }
+
+    @Test
+    public void testWhiteSpace() {
+        assertEquals(-3 + 3, stringCalculator.add("-3, 3"));
+        assertEquals(0, stringCalculator.add(" "));
     }
 
     @Test(expected = RuntimeException.class)
-    public void AddingNonNumericNumbers() {
-        target.add("1,abcdefg");
+    public void testTooLowRangePoints() {
+        StringCalculator.methodRankPoints(0);
     }
 
-    @Test
-    public void AddArbitraryNumbers() {
-        assertEquals(1 + 2 + 3 + 4, target.add("1,2,3,4"));
+    public void testGoodRangePoints() {
+        StringCalculator.methodRankPoints(145);
+        assert (true);
     }
-
-    @Test
-    public void AddEmptyArgs() {
-        assertEquals(0, target.add(","));
-    }
-
-    @Test
-    public void incompleteArgs() {
-        assertEquals(57, target.add("57,"));
-        assertEquals(76, target.add(",76"));
-    }
-
-    @Test
-    public void testAddingNumbersWhereWhitespaceIsPresent() {
-        assertEquals(1 + 2, target.add("1, 2"));
-    }
-
 }

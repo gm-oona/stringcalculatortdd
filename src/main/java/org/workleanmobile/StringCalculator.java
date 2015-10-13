@@ -1,18 +1,38 @@
 package org.workleanmobile;
 
 public class StringCalculator {
+    private StringParser parser;
+
+    public StringCalculator(StringParser parse) {
+        this.parser = parse;
+    }
 
     public int add(String string) {
 
-        int totalResult = 0;
-        String[] numberStrings = string.split(",");
-        for (String numberString : numberStrings) {
+        int returnVal = 0;
+        String[] splitNumbers = parser.parse(string);
+        for (String numberString : splitNumbers) {
+            numberString = numberString.trim();
             if (!numberString.isEmpty()) {
-                Integer result = Integer.valueOf(numberString.trim());
-                totalResult += result.intValue();
+                returnVal += Integer.valueOf(numberString);
             }
         }
-        return totalResult;
+        return returnVal;
+
+    }
+
+    public static void methodRankPoints(double points) {
+        if (points >= 202.5) {
+// writer.
+// Writer.("Rank:A1");
+        }
+        else if (points >= 122.4) {
+            System.out.println("Rank:A2");
+        }
+        else {
+            throw new RuntimeException("Too low of a point range");
+// System.out.println("Rank:A3");
+        }
     }
 
 }
